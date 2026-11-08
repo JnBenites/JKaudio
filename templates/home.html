@@ -1,0 +1,357 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JKaudio | Texto a voz</title>
+    <meta name="description" content="Convierte tus textos en audio con JKaudio.">
+    <meta name="theme-color" content="#111111">
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+
+<body>
+
+<header class="topbar">
+    <a href="/" class="brand">JK<span>audio</span></a>
+
+    <nav class="nav-actions">
+        {% if user.is_authenticated %}
+            <span class="nav-link">{{ user.username }}</span>
+            <form method="post" action="{% url 'accounts:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="nav-link">Cerrar sesión</button>
+            </form>
+        {% else %}
+            <a href="{% url 'accounts:login' %}" class="nav-link">Iniciar sesión</a>
+            <a href="{% url 'accounts:register' %}" class="nav-link nav-primary">Crear cuenta</a>
+        {% endif %}
+    </nav>
+</header>
+
+<main class="main">
+
+    <section class="hero">
+        <span class="eyebrow">Text to Speech</span>
+        <h1>Tu texto, convertido<br>en <span>voz.</span></h1>
+        <p>Transforma tus palabras en audio. Escribe, selecciona una voz y crea tu próximo contenido.</p>
+    </section>
+
+    <section class="workspace-grid">
+
+        <!-- GENERADOR -->
+        <section class="generator-card">
+
+            <h2 class="card-title">Generar audio</h2>
+
+            <form id="generator-form" method="post" action="{% url 'generator:validate_generation' %}">
+                {% csrf_token %}
+
+                <div class="field-heading">
+                    <label for="text">Texto para convertir</label>
+                    <span class="counter">
+                        <span id="char-count">0</span> / 3000
+                    </span>
+                </div>
+
+                <textarea
+                    id="text"
+                    name="text"
+                    maxlength="3000"
+                    placeholder="Escribe o pega aquí tu texto..."
+                    aria-describedby="char-count"
+                    autocomplete="off"
+                    required
+                ></textarea>
+
+                <div class="settings">
+
+                    <div class="setting">
+                        <label for="voice">Voz</label>
+                        <select id="voice" name="voice">
+                            {% for value, label in voices %}
+                                <option value="{{ value }}" {% if value == default_voice %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="setting">
+                        <label for="language">Idioma</label>
+                        <select id="language" disabled>
+                            <option>Español</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <button
+                    id="generate-button"
+                    class="generate-button"
+                    type="submit"
+                    {% if not user.is_authenticated %}disabled{% endif %}
+                >
+                    {% if user.is_authenticated %}
+                        Generar audio
+                    {% else %}
+                        Inicia sesión para generar
+                    {% endif %}
+                </button>
+
+                <p class="helper">Máximo 3.000 caracteres por generación.</p>
+                <p id="generation-status" role="status" aria-live="polite"></p>
+
+                <div id="audio-result" hidden>
+                    <h3>Tu audio está listo</h3>
+
+                    <audio id="audio-player" controls preload="none">
+                        Tu navegador no admite la reproducción de audio.
+                    </audio>
+
+                    <p>
+                        <a id="download-link" href="#" download>Descargar MP3</a>
+                    </p>
+                </div>
+
+            </form>
+
+        </section>
+
+        <!-- HISTORIAL -->
+        <section class="history-card">
+
+            <h2 class="card-title">Historial de audios</h2>
+
+            <div class="history-list">
+
+                {% if not user.is_authenticated %}
+
+                    <div class="history-empty">
+                        <p>Inicia sesión para consultar tu historial.</p>
+                    </div>
+
+                {% elif history_jobs %}
+
+                    {% for job in history_jobs %}
+
+                        <article class="history-item">
+
+                            <h3>Generación #{{ job.id }}</h3>
+
+                            <p>
+                                {{ job.created_at|date:"d/m/Y H:i" }}
+                            </p>
+
+                            <p>
+                                Estado: {{ job.get_status_display }}
+                            </p>
+
+                            {% if job.status == 'completed' and job.audio_path %}
+
+                                <audio controls preload="none">
+                                    <source
+                                        src="{% url 'generator:stream_audio' job.id %}"
+                                        type="audio/mpeg"
+                                    >
+                                    Tu navegador no admite audio.
+                                </audio>
+
+                                <p>
+                                    <a href="{% url 'generator:download_audio' job.id %}" download>
+                                        Descargar MP3
+                                    </a>
+                                </p>
+
+                            {% elif job.status == 'failed' %}
+
+                                <p>{{ job.error_message }}</p>
+
+                            {% elif job.status == 'expired' %}
+
+                                <p>Este audio ha expirado.</p>
+
+                            {% endif %}
+
+                        </article>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <div class="history-empty">
+                        <p>Aún no tienes audios generados.</p>
+                        <p>Tus generaciones aparecerán aquí.</p>
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+    </section>
+
+</main>
+
+<footer class="footer">
+    JKaudio · Generador de voz · {% now "Y" %}
+</footer>
+
+<script>
+    const form = document.getElementById('generator-form');
+    const textArea = document.getElementById('text');
+    const charCount = document.getElementById('char-count');
+    const button = document.getElementById('generate-button');
+    const status = document.getElementById('generation-status');
+
+    const audioResult = document.getElementById('audio-result');
+    const audioPlayer = document.getElementById('audio-player');
+    const downloadLink = document.getElementById('download-link');
+
+    let currentJobId = null;
+    let currentMonitor = null;
+    let retries = 0;
+
+    const MAX_RETRIES = 20;           // ~1 minuto con 3s
+    const POLL_INTERVAL = 2000;
+    const RETRY_INTERVAL = 3000;
+
+    textArea.addEventListener('input', () => {
+        charCount.textContent = textArea.value.length;
+    });
+
+    // Cancela el monitor activo (si lo hay)
+    function stopMonitor() {
+        if (currentMonitor) {
+            clearTimeout(currentMonitor);
+            currentMonitor = null;
+        }
+    }
+
+    // Vuelve a habilitar el botón con su texto normal
+    function enableButton() {
+        button.disabled = false;
+        button.textContent = 'Generar audio';
+    }
+
+    async function monitorJob(jobId) {
+        // Si el job cambió (nuevo envío), abandonamos este monitor
+        if (currentJobId !== jobId) return;
+
+        try {
+            const response = await fetch(`/generador/estado/${jobId}/`);
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Error consultando el trabajo.');
+            }
+
+            // Reiniciamos reintentos al recibir respuesta válida
+            retries = 0;
+
+            if (data.status === 'queued') {
+                status.textContent = 'Tu solicitud está en cola...';
+            }
+
+            else if (data.status === 'processing') {
+                status.textContent = 'Generando tu audio...';
+            }
+
+            else if (data.status === 'completed') {
+                status.textContent = '¡Tu audio está listo!';
+
+                audioPlayer.src = data.audio_url;
+                downloadLink.href = data.download_url;
+
+                audioResult.hidden = false;
+                audioPlayer.load();
+
+                enableButton();
+
+                // Refrescar el historial para mostrar el nuevo audio
+                // (recarga simple; si prefieres, cambia por fetch parcial)
+                setTimeout(() => window.location.reload(), 1500);
+                return;
+            }
+
+            else if (data.status === 'failed') {
+                status.textContent = data.message || 'La generación ha fallado.';
+                enableButton();
+                return;
+            }
+
+            else if (data.status === 'expired') {
+                status.textContent = 'El audio ha expirado.';
+                enableButton();
+                return;
+            }
+
+            currentMonitor = setTimeout(() => monitorJob(jobId), POLL_INTERVAL);
+
+        } catch (error) {
+            if (++retries > MAX_RETRIES) {
+                status.textContent = 'No se pudo consultar el estado. Recarga la página.';
+                enableButton();
+                return;
+            }
+
+            status.textContent = 'No se pudo consultar el estado. Reintentando...';
+            currentMonitor = setTimeout(() => monitorJob(jobId), RETRY_INTERVAL);
+        }
+    }
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        if (!textArea.value.trim()) {
+            status.textContent = 'Escribe un texto para continuar.';
+            return;
+        }
+
+        // Cancelar cualquier monitor previo antes de empezar
+        stopMonitor();
+        retries = 0;
+
+        button.disabled = true;
+        button.textContent = 'Enviando solicitud...';
+
+        audioResult.hidden = true;
+        audioPlayer.removeAttribute('src');
+        downloadLink.removeAttribute('href');
+
+        try {
+            const response = await fetch(
+                "{% url 'generator:validate_generation' %}",
+                {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(
+                    data.message || 'No se pudo iniciar la generación.'
+                );
+            }
+
+            currentJobId = data.job_id;
+
+            status.textContent = `Trabajo #${data.job_id} recibido.`;
+            button.textContent = 'Generando...';
+
+            // No reactivamos aquí: el botón sigue deshabilitado
+            // hasta que el job termine (completed / failed / expired).
+            monitorJob(data.job_id);
+
+        } catch (error) {
+            status.textContent = error.message;
+            enableButton();
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,76 @@
+services:
+
+  web:
+    build: .
+    container_name: jkaudio-web
+    restart: unless-stopped
+    env_file:
+      - .env
+    command: >
+      sh -c "python manage.py collectstatic --noinput &&
+      gunicorn config.wsgi:application
+      --bind 0.0.0.0:8000
+      --workers 2
+      --timeout 120"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./db.sqlite3:/app/db.sqlite3
+      - ./media:/app/media
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  worker:
+    build: .
+    container_name: jkaudio-worker
+    restart: unless-stopped
+    env_file:
+      - .env
+    command: python -m apps.generator.worker
+    volumes:
+      - ./db.sqlite3:/app/db.sqlite3
+      - ./media:/app/media
+    depends_on:
+      redis:
+        condition: service_healthy
+      kokoro-tts:
+        condition: service_started
+
+  redis:
+    image: redis:7-alpine
+    container_name: jkaudio-redis
+    restart: unless-stopped
+    env_file:
+      - .env
+    command:
+      - sh
+      - -c
+      - exec redis-server --appendonly yes --requirepass "$$REDIS_PASSWORD"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - redis-cli -a "$$REDIS_PASSWORD" ping | grep -q PONG
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kokoro-tts:
+    image: ghcr.io/remsky/kokoro-fastapi-cpu:latest
+    container_name: ia-kokoro
+    restart: unless-stopped
+    environment:
+      DEVICE_TYPE: cpu
+      USE_GPU: "false"
+      WEB_CONCURRENCY: "1"
+      API_LOG_LEVEL: WARNING
+    volumes:
+      - kokoro_data:/app/data
+    mem_limit: 3g
+    cpus: 2.0
+
+volumes:
+  redis_data:
+  kokoro_data:

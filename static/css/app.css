@@ -1,0 +1,686 @@
+
+/* ========================================
+   JKaudio - Estilos generales
+======================================== */
+
+:root {
+    color-scheme: dark;
+
+    --md-background: #111318;
+    --md-surface: #1b1b23;
+    --md-surface-container: #22232b;
+    --md-surface-high: #2b2d36;
+
+    --md-primary: #c5b8ff;
+    --md-primary-container: #51458a;
+    --md-on-primary: #30265e;
+
+    --md-text: #e5e1ec;
+    --md-muted: #aaa6b5;
+    --md-outline: #494650;
+
+    --md-success: #35c98a;
+    --md-error: #ff6474;
+    --md-warning: #f2c45c;
+    --md-info: #69a9ff;
+
+    --md-radius: 20px;
+    --md-radius-large: 28px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--md-background);
+    color: var(--md-text);
+    font-family: Roboto, "Segoe UI", Arial, sans-serif;
+    line-height: 1.5;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+}
+
+button,
+a,
+select {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* ========================================
+   Navegación
+======================================== */
+
+.topbar {
+    min-height: 76px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 7%;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+}
+
+.brand {
+    font-size: 23px;
+    font-weight: 700;
+    letter-spacing: -1px;
+}
+
+.brand span {
+    color: var(--md-primary);
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-actions form {
+    margin: 0;
+}
+
+.nav-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--md-text);
+    padding: 10px 16px;
+    border: 0;
+    border-radius: 100px;
+    background: transparent;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.nav-link:hover {
+    background: var(--md-surface-high);
+}
+
+.nav-primary {
+    background: var(--md-primary);
+    color: var(--md-on-primary);
+    font-weight: 600;
+}
+
+.nav-primary:hover {
+    background: #d5cbff;
+}
+
+/* ========================================
+   Estructura general
+======================================== */
+
+.main {
+    width: min(100% - 40px, 1400px);
+    margin: 55px auto 90px;
+}
+
+.hero {
+    text-align: center;
+    margin-bottom: 38px;
+}
+
+.eyebrow {
+    display: inline-block;
+    padding: 7px 14px;
+    border-radius: 100px;
+    background: var(--md-surface-container);
+    color: var(--md-primary);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.hero h1 {
+    margin: 22px 0 12px;
+    font-size: clamp(34px, 5vw, 54px);
+    line-height: 1.12;
+    letter-spacing: -2px;
+}
+
+.hero h1 span {
+    color: var(--md-primary);
+}
+
+.hero p {
+    max-width: 540px;
+    margin: auto;
+    color: var(--md-muted);
+    font-size: 16px;
+}
+
+/* ========================================
+   Generador - dos columnas
+======================================== */
+
+.workspace-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 24px;
+}
+
+.generator-card,
+.history-card {
+    min-width: 0;
+    padding: 28px;
+    background: var(--md-surface);
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: var(--md-radius-large);
+    box-shadow: 0 16px 50px rgba(0,0,0,.18);
+}
+
+.card-title {
+    margin: 0 0 22px;
+    font-size: 20px;
+    font-weight: 650;
+}
+
+.field-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.field-heading label,
+.field-label {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.counter {
+    color: var(--md-muted);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ========================================
+   Campos de formulario
+======================================== */
+
+textarea {
+    display: block;
+    width: 100%;
+    min-height: 190px;
+    resize: vertical;
+    padding: 18px;
+    color: var(--md-text);
+    background: var(--md-surface-container);
+    border: 1px solid var(--md-outline);
+    border-radius: 16px;
+    outline: none;
+    transition: border-color .2s, background .2s;
+}
+
+textarea::placeholder,
+input::placeholder {
+    color: #888492;
+}
+
+input,
+select {
+    width: 100%;
+    min-height: 50px;
+    padding: 0 14px;
+    color: var(--md-text);
+    background: var(--md-surface-container);
+    border: 1px solid var(--md-outline);
+    border-radius: 14px;
+    outline: none;
+}
+
+textarea:focus,
+input:focus,
+select:focus {
+    border-color: var(--md-primary);
+    outline: 2px solid rgba(197,184,255,.12);
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+.settings {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 26px;
+}
+
+.setting label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.setting select {
+    height: 52px;
+}
+
+/* ========================================
+   Botones
+======================================== */
+
+.generate-button {
+    width: 100%;
+    min-height: 54px;
+    margin-top: 28px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 100px;
+    background: var(--md-primary);
+    color: var(--md-on-primary);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .2s, opacity .2s;
+}
+
+.generate-button:hover:not(:disabled) {
+    background: #d5cbff;
+}
+
+.generate-button:disabled {
+    cursor: not-allowed;
+    opacity: .55;
+}
+
+.helper {
+    margin: 14px 0 0;
+    color: var(--md-muted);
+    font-size: 12px;
+    text-align: center;
+}
+
+.helper a {
+    color: var(--md-primary);
+}
+
+.helper a:hover {
+    text-decoration: underline;
+}
+
+/* ========================================
+   Resultado de audio
+======================================== */
+
+#audio-result {
+    margin-top: 24px;
+    padding: 20px;
+    background: var(--md-surface-container);
+    border: 1px solid var(--md-outline);
+    border-radius: 16px;
+}
+
+#audio-result[hidden] {
+    display: none;
+}
+
+#audio-result h3 {
+    margin-top: 0;
+    font-size: 17px;
+}
+
+#audio-player {
+    display: block;
+    width: 100%;
+    margin: 14px 0;
+}
+
+#download-link {
+    color: var(--md-primary);
+    font-weight: 600;
+}
+
+/* ========================================
+   Historial de audios
+======================================== */
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.history-item {
+    padding: 16px;
+    background: var(--md-surface-container);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 16px;
+}
+
+.history-item h3 {
+    margin: 0 0 8px;
+    font-size: 15px;
+}
+
+.history-item p {
+    margin: 5px 0;
+    color: var(--md-muted);
+    font-size: 13px;
+}
+
+.history-item audio {
+    width: 100%;
+    margin-top: 12px;
+}
+
+.history-empty {
+    padding: 30px 15px;
+    color: var(--md-muted);
+    text-align: center;
+}
+
+/* ========================================
+   Autenticación
+======================================== */
+
+.auth-main {
+    width: min(100% - 32px, 480px);
+    margin: 75px auto;
+}
+
+.auth-main .hero {
+    margin-bottom: 30px;
+}
+
+.auth-main .generator-card {
+    padding: 32px;
+}
+
+.auth-main form p {
+    margin: 0 0 20px;
+}
+
+.auth-main form label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.auth-main form input {
+    display: block;
+}
+
+.auth-main form ul {
+    padding-left: 20px;
+    color: var(--md-muted);
+    font-size: 12px;
+}
+
+.auth-main .helptext {
+    display: block;
+    margin-top: 8px;
+    color: var(--md-muted);
+    font-size: 12px;
+}
+
+.auth-main .errorlist {
+    color: var(--md-error);
+    font-size: 13px;
+}
+
+/* ========================================
+   Monitoreo
+======================================== */
+
+.monitoring-page {
+    padding: 30px;
+}
+
+.monitoring-page .container {
+    max-width: 1400px;
+    margin: auto;
+}
+
+.monitoring-page header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.monitoring-page h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.monitoring-page h2 {
+    margin-top: 0;
+    font-size: 17px;
+}
+
+.monitoring-page .subtitle,
+.monitoring-page .muted {
+    color: var(--md-muted);
+}
+
+.monitoring-page .panel,
+.monitoring-page .metric {
+    padding: 22px;
+    background: var(--md-surface);
+    border: 1px solid var(--md-outline);
+    border-radius: 16px;
+}
+
+.monitoring-page .panel {
+    margin-bottom: 22px;
+}
+
+.monitoring-page .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.monitoring-page .metric-label {
+    margin-bottom: 12px;
+    color: var(--md-muted);
+    font-size: 13px;
+}
+
+.monitoring-page .metric-value {
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.green {
+    color: var(--md-success);
+}
+
+.red {
+    color: var(--md-error);
+}
+
+.yellow {
+    color: var(--md-warning);
+}
+
+.blue {
+    color: var(--md-info);
+}
+
+.monitoring-page .status {
+    display: inline-block;
+    padding: 6px 11px;
+    border-radius: 20px;
+    background: var(--md-surface-high);
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.monitoring-page .status-ok {
+    color: var(--md-success);
+}
+
+.monitoring-page .status-error {
+    color: var(--md-error);
+}
+
+.monitoring-page .status-warning {
+    color: var(--md-warning);
+}
+
+.monitoring-page .settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 18px;
+}
+
+.monitoring-page .setting-label {
+    margin-bottom: 7px;
+    color: var(--md-muted);
+    font-size: 13px;
+}
+
+.monitoring-page .setting-value {
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.monitoring-page .table-wrapper {
+    overflow-x: auto;
+}
+
+.monitoring-page table {
+    width: 100%;
+    min-width: 700px;
+    border-collapse: collapse;
+}
+
+.monitoring-page th,
+.monitoring-page td {
+    padding: 13px 10px;
+    border-bottom: 1px solid var(--md-outline);
+    font-size: 13px;
+    text-align: left;
+}
+
+.monitoring-page th {
+    color: var(--md-muted);
+    font-weight: normal;
+}
+
+.monitoring-page tr:last-child td {
+    border-bottom: none;
+}
+
+.monitoring-page .empty {
+    padding: 20px 0;
+    color: var(--md-muted);
+}
+
+.monitoring-page .worker {
+    margin-top: 10px;
+    padding: 12px;
+    background: var(--md-surface-high);
+    border-radius: 8px;
+}
+
+.monitoring-page .top-link {
+    color: var(--md-info);
+    font-size: 14px;
+}
+
+/* ========================================
+   Pie de página
+======================================== */
+
+.footer {
+    padding: 25px;
+    border-top: 1px solid rgba(255,255,255,.07);
+    color: var(--md-muted);
+    font-size: 13px;
+    text-align: center;
+}
+
+/* ========================================
+   Adaptación móvil
+======================================== */
+
+@media (max-width: 850px) {
+    .workspace-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .topbar {
+        min-height: 66px;
+        padding: 0 18px;
+    }
+
+    .brand {
+        font-size: 20px;
+    }
+
+    .main {
+        width: min(100% - 28px, 1400px);
+        margin-top: 38px;
+    }
+
+    .hero {
+        margin-bottom: 30px;
+    }
+
+    .hero h1 {
+        letter-spacing: -1px;
+    }
+
+    .generator-card,
+    .history-card {
+        padding: 20px 16px;
+    }
+
+    .settings {
+        grid-template-columns: 1fr;
+    }
+
+    .nav-actions {
+        gap: 2px;
+    }
+
+    .nav-link {
+        padding: 9px 10px;
+        font-size: 12px;
+    }
+
+    .auth-main {
+        margin: 45px auto;
+    }
+
+    .auth-main .generator-card {
+        padding: 24px 18px;
+    }
+
+    .monitoring-page {
+        padding: 15px;
+    }
+
+    .monitoring-page h1 {
+        font-size: 23px;
+    }
+}

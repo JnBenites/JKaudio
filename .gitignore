@@ -1,0 +1,43 @@
+﻿# Entorno virtual
+.venv/
+venv/
+env/
+
+# Variables y secretos
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django y base de datos
+*.sqlite3
+staticfiles/
+
+# Archivos generados
+media/
+*.mp3
+*.wav
+
+# Registros y temporales
+*.log
+logs_cleanup.txt
+*.tmp
+*.bak
+*.save
+
+# Editores
+.vscode/
+.idea/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Archivos locales que no se publicarán
+/HELP.PY
+/db.sqlite3.backup-*

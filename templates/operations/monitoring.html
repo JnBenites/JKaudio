@@ -1,0 +1,282 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JKaudio | Monitoreo</title>
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+
+<body class="monitoring-page">
+
+<div class="container">
+
+    <header>
+        <div>
+            <h1>JKaudio | Monitoreo</h1>
+            <p class="subtitle">
+                Panel de operaciones · {{ today|date:"d/m/Y" }}
+            </p>
+        </div>
+
+        <a class="top-link" href="/admin/">Administración Django</a>
+    </header>
+
+    <section class="panel">
+        <h2>Infraestructura</h2>
+
+        <p>
+            Redis:
+            {% if redis_data.connected %}
+                <span class="status status-ok">Conectado</span>
+            {% else %}
+                <span class="status status-error">Desconectado</span>
+            {% endif %}
+        </p>
+
+        {% if redis_data.connected %}
+            <p class="muted">
+                Cola: {{ redis_data.queue_name }}
+            </p>
+        {% else %}
+            <p class="status status-error">
+                {{ redis_data.error|default:"No se pudo consultar Redis." }}
+            </p>
+        {% endif %}
+    </section>
+
+    <section class="grid">
+        <div class="metric">
+            <div class="metric-label">Trabajos en espera</div>
+            <div class="metric-value blue">
+                {{ redis_data.pending|default:0 }}
+            </div>
+        </div>
+
+        <div class="metric">
+            <div class="metric-label">Trabajos procesándose</div>
+            <div class="metric-value yellow">
+                {{ redis_data.processing|default:0 }}
+            </div>
+        </div>
+
+        <div class="metric">
+            <div class="metric-label">Trabajos fallidos</div>
+            <div class="metric-value red">
+                {{ redis_data.failed|default:0 }}
+            </div>
+        </div>
+
+        <div class="metric">
+            <div class="metric-label">Trabajos terminados en RQ</div>
+            <div class="metric-value green">
+                {{ redis_data.finished|default:0 }}
+            </div>
+        </div>
+
+        <div class="metric">
+            <div class="metric-label">Solicitudes de hoy</div>
+            <div class="metric-value">
+                {{ requests_today }}
+            </div>
+        </div>
+
+        <div class="metric">
+            <div class="metric-label">Descargas de hoy</div>
+            <div class="metric-value">
+                {{ downloads_today }}
+            </div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Estado de los trabajadores (Workers)</h2>
+
+        {% if redis_data.connected %}
+            {% for worker in redis_data.workers %}
+                <div class="worker">
+                    <strong>{{ worker.name }}</strong>
+                    <span class="muted"> — {{ worker.state }}</span>
+                </div>
+            {% empty %}
+                <p class="empty">No se encontraron trabajadores registrados.</p>
+            {% endfor %}
+        {% else %}
+            <p class="empty">
+                Información no disponible mientras Redis esté desconectado.
+            </p>
+        {% endif %}
+    </section>
+
+    <section class="panel">
+        <h2>Generaciones por estado (Base de datos)</h2>
+
+        <div class="grid">
+            <div class="metric">
+                <div class="metric-label">En espera</div>
+                <div class="metric-value blue">
+                    {{ job_counts.queued|default:0 }}
+                </div>
+            </div>
+
+            <div class="metric">
+                <div class="metric-label">Procesando</div>
+                <div class="metric-value yellow">
+                    {{ job_counts.processing|default:0 }}
+                </div>
+            </div>
+
+            <div class="metric">
+                <div class="metric-label">Completadas</div>
+                <div class="metric-value green">
+                    {{ job_counts.completed|default:0 }}
+                </div>
+            </div>
+
+            <div class="metric">
+                <div class="metric-label">Fallidas</div>
+                <div class="metric-value red">
+                    {{ job_counts.failed|default:0 }}
+                </div>
+            </div>
+
+            <div class="metric">
+                <div class="metric-label">Canceladas</div>
+                <div class="metric-value">
+                    {{ job_counts.cancelled|default:0 }}
+                </div>
+            </div>
+
+            <div class="metric">
+                <div class="metric-label">Expiradas</div>
+                <div class="metric-value">
+                    {{ job_counts.expired|default:0 }}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Configuración del servicio</h2>
+
+        {% if service_settings %}
+            <div class="settings-grid">
+
+                <div>
+                    <div class="setting-label">Generaciones por IP / día</div>
+                    <div class="setting-value">
+                        {{ service_settings.max_generations_per_ip_per_day }}
+                    </div>
+                </div>
+
+                <div>
+                    <div class="setting-label">Longitud máxima del texto</div>
+                    <div class="setting-value">
+                        {{ service_settings.max_text_length }}
+                    </div>
+                </div>
+
+                <div>
+                    <div class="setting-label">Retención de audio (minutos)</div>
+                    <div class="setting-value">
+                        {{ service_settings.audio_retention_minutes }}
+                    </div>
+                </div>
+
+                <div>
+                    <div class="setting-label">Generación habilitada</div>
+                    <div class="setting-value">
+                        {% if service_settings.generation_enabled %}
+                            <span class="green">Sí</span>
+                        {% else %}
+                            <span class="red">No</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div>
+                    <div class="setting-label">Modo mantenimiento</div>
+                    <div class="setting-value">
+                        {% if service_settings.maintenance_mode %}
+                            <span class="yellow">Activo</span>
+                        {% else %}
+                            <span class="green">Inactivo</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        {% else %}
+            <p class="empty">
+                No se encontró la configuración del servicio.
+            </p>
+        {% endif %}
+    </section>
+
+    <section class="panel">
+        <h2>Últimas 10 generaciones</h2>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Estado</th>
+                        <th>Creación</th>
+                        <th>Finalización</th>
+                        <th>Descargas</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for job in recent_jobs %}
+                        <tr>
+                            <td>#{{ job.id }}</td>
+
+                            <td>
+                                {% if job.user %}
+                                    {{ job.user.username }}
+                                {% else %}
+                                    Anónimo
+                                {% endif %}
+                            </td>
+
+                            <td>{{ job.get_status_display }}</td>
+
+                            <td>
+                                {{ job.created_at|date:"d/m/Y H:i" }}
+                            </td>
+
+                            <td>
+                                {% if job.finished_at %}
+                                    {{ job.finished_at|date:"d/m/Y H:i" }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+
+                            <td>{{ job.download_count }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="empty">
+                                Todavía no hay generaciones registradas.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <footer class="muted">
+        <p>JKaudio · Panel interno de operaciones</p>
+    </footer>
+
+</div>
+
+</body>
+</html>

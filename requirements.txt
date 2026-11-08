@@ -1,0 +1,11 @@
+asgiref==3.13.0
+click==8.5.0
+croniter==6.2.4
+Django==5.2.19
+python-dateutil==4.0.0
+redis==6.4.0
+rq==2.12.0
+sqlparse==0.6.1
+tzdata==2026.6
+gunicorn==23.0.0
+whitenoise==6.9.0

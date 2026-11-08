@@ -1,0 +1,46 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Crear cuenta | JKaudio</title>
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+
+<body>
+
+<main class="auth-main">
+
+    <section class="hero">
+        <span class="eyebrow">JKaudio</span>
+        <h1>Crear tu <span>cuenta</span></h1>
+        <p>Regístrate para comenzar a utilizar JKaudio.</p>
+    </section>
+
+    <section class="generator-card">
+
+        <h2 class="card-title">Registro</h2>
+
+        <form method="post">
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <button class="generate-button" type="submit">
+                Crear cuenta
+            </button>
+        </form>
+
+        <p class="helper">
+            ¿Ya tienes cuenta?
+            <a href="{% url 'accounts:login' %}">Inicia sesión</a>
+        </p>
+
+    </section>
+
+</main>
+
+</body>
+</html>
