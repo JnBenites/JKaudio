@@ -132,15 +132,3 @@ Utiliza `.env.example` como plantilla de configuración.
 **Juan Benites**
 
 GitHub: https://github.com/JnBenites
-
-## Licencia
-
-Copyright (C) 2026 Juan Benites.
-
-Este proyecto está distribuido bajo los términos de la **GNU General Public License v3.0 (GNU GPL-3.0)**.
-
-Consulta el archivo [LICENSE](LICENSE) para conocer el texto completo de la licencia.
-
-Este programa es software libre: puedes redistribuirlo y/o modificarlo bajo los términos de la GNU General Public License, versión 3, publicada por la Free Software Foundation.
-
-Este programa se distribuye con la esperanza de que sea útil, pero SIN NINGUNA GARANTÍA; sin siquiera la garantía implícita de COMERCIALIZACIÓN o IDONEIDAD PARA UN PROPÓSITO PARTICULAR.
