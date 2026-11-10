@@ -127,8 +127,3 @@ No publiques archivos `.env`, contraseñas, claves secretas, bases de datos pers
 
 Utiliza `.env.example` como plantilla de configuración.
 
-## Autor
-
-**Juan Benites**
-
-GitHub: https://github.com/JnBenites
